@@ -1,0 +1,62 @@
+#!/usr/bin/env ruby
+#encoding: UTF-8
+
+class Key
+
+    attr_reader :key_list
+
+    def initialize(filename)
+        @key_list = Hash.new
+        
+        File.read(filename).each_line do |line|
+        	@key_list[line.chomp] = nil
+        	#puts "#{filename}:#{line.chomp}"
+        end
+    end
+    
+    def diff(new_key_list)
+    
+        diff = Hash.new
+        [ '-', '+', '='].each do |item|
+        	diff[item] = Hash.new
+        end
+
+        @key_list.each_key do |a_key|
+        
+        	if new_key_list.key_list.has_key?(a_key)
+        		diff['='][a_key] = nil
+        	else
+        		diff['-'][a_key] = nil
+        	end
+
+        end
+
+
+        new_key_list.key_list.each_key do |a_key|
+        
+        	if @key_list.has_key?(a_key)
+        		diff['='][a_key] = nil
+        	else
+        		diff['+'][a_key] = nil
+        	end
+
+        end
+
+        
+        return diff
+    end
+    
+end
+
+
+old_key = Key.new(ARGV.shift)
+new_key = Key.new(ARGV.shift)
+
+
+diff = old_key.diff(new_key)
+
+[ '-', '+', '='].each do |item|
+	diff[item].sort_by {|key,val| key }.each do |data|
+		puts "#{item}:#{data[0]}"
+	end
+end
